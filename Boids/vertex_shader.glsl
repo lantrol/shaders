@@ -1,12 +1,12 @@
 #version 330
 
 in vec2 position;
-in float size;
+in vec2 velocity;
 
 out vec2 vertex_pos;
-out float vertex_size;
+out vec2 boid_vel;
 
 void main() {
     vertex_pos = position;
-    vertex_size = size;
+    boid_vel = velocity;
 }

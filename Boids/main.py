@@ -5,7 +5,7 @@ import moderngl
 import numpy as np
 import pygame
 
-SCREEN_SIZE = 800
+SCREEN_SIZE = 1000
 GROUPX = 256
 GROUPY = 1
 
@@ -13,7 +13,7 @@ os.environ['SDL_WINDOWS_DPI_AWARENESS'] = 'permonitorv2'
 
 # Makes Pygame use OpenGL for rendering
 pygame.init()
-pygame.display.set_mode((SCREEN_SIZE, SCREEN_SIZE), flags=pygame.OPENGL | pygame.DOUBLEBUF, vsync=True)
+pygame.display.set_mode((SCREEN_SIZE, SCREEN_SIZE), flags=pygame.OPENGL | pygame.DOUBLEBUF, vsync=False)
 
 CLOCK = pygame.time.Clock()
 
@@ -50,20 +50,35 @@ class Scene:
             fragment_shader=frag_shader
         )
 
-        points = np.array([
-            0., 0., 0.05, 0,
-        ])
+        #X, Y, vel, angle
+        num_boids = 2000
+        boids_info = []
+        for i in range(num_boids):
+            a = np.random.rand()-0.5
+            b = np.random.rand()-0.5
+            c = np.sqrt(b**2 + a**2)/0.006
+            boids_info += [np.random.rand()*2-1, np.random.rand()*2-1, a/c, b/c]
+
+        # points = np.array([
+        #     0., 0., 0.01, 0.,
+        #     0., 0.5, 0.01, 0.006,
+        # ])
+
+        points = np.array(boids_info)
 
         # We load the vertices into a vertex buffer object, allowing to Opengl to read them
         self.vbo1 = self.ctx.buffer(points.astype('f4').tobytes())
         self.vbo2 = self.ctx.buffer(points.astype('f4').tobytes())
         # We create a vertex array object for each program, asignin them the vertex buffer, telling them
         # how to interprete them (two pairs of floats), the first set to the variable "vert" and the second to "texcoord"
-        self.vao1 = self.ctx.vertex_array(self.program, [(self.vbo1, '2f 2x4', 'position')], mode=self.ctx.POINTS)
-        self.vao2 = self.ctx.vertex_array(self.program, [(self.vbo2, '2f 2x4', 'position')], mode=self.ctx.POINTS)
+        self.vao1 = self.ctx.vertex_array(self.program, [(self.vbo1, '2f 2f', 'position', 'velocity')], mode=self.ctx.POINTS)
+        self.vao2 = self.ctx.vertex_array(self.program, [(self.vbo2, '2f 2f', 'position', 'velocity')], mode=self.ctx.POINTS)
 
         file = open('compute_shader.glsl')
         comp_shader = file.read()
+        comp_shader = comp_shader.replace("GROUPX", str(GROUPX))
+        comp_shader = comp_shader.replace("GROUPY", str(GROUPY))
+        print(comp_shader)
 
         self.compute_shader = self.ctx.compute_shader(comp_shader)
 
