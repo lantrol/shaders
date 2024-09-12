@@ -20,7 +20,7 @@ layout(std430, binding=1) buffer boids_out
 void main() {
     int callID = int(gl_GlobalInvocationID);
 
-    float matchFactor = 0.02;
+    float matchFactor = 0.08;
 
     Boid boid = In.boids[callID];
     Boid out_boid;
@@ -31,8 +31,8 @@ void main() {
     for (int i = 0; i < In.boids.length(); i++){
         if (i != callID) {
             Boid boid = In.boids[i];
-            vec4 curInfo = boid.posVel.xyzw;
-            velSum += curInfo.zw;
+            vec4 otherInfo = boid.posVel.xyzw;
+            velSum += otherInfo.zw;
         }
     }
 
@@ -40,7 +40,8 @@ void main() {
 
     vec2 vel = vec2(0., 0.);
     vel += curInfo.zw+(velSum-curInfo.zw)*matchFactor;
-    vel = vel/(vel.length()+0.00001);
+    //vel = vel/(vel.length()+0.00001);
+    curInfo.zw = vel;
     curInfo.xy += curInfo.zw;
 
     out_boid.posVel.xyzw = curInfo.xyzw;

@@ -11,7 +11,7 @@ out vec3 g_color;
 
 void main(){
     vec2 vPos = vertex_pos[0];
-    float vSize = 0.03;
+    float vSize = 0.01;
     float vAngle = atan(boid_vel[0].y, boid_vel[0].x);
     mat2 rotate;
     rotate[0] = vec2(cos(vAngle), sin(vAngle));
