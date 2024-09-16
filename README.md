@@ -7,3 +7,9 @@ Classic Game Of Life simulation made with Python and GLSL, using PyGame and Mode
 Helpful to understand the basics of textures and framebuffers.
 
 ![GameOfLifeGIF](https://github.com/user-attachments/assets/e57bca4d-7d63-40b8-a36c-65f44680cd23)
+
+## Boids Simulation:
+2D simulation of Boids made using Python Arcade and GLSL, used to learn the basics of compute shaders.
+In the following GIF you can see it run on a laptop iGPU with 10000 Boids at around 30 FPS, totaling 100000000 calculations.
+
+![BoidsGIF](https://github.com/user-attachments/assets/2475ec5d-2819-407a-ab7a-e06feb4d17bb)
