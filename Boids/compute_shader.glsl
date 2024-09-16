@@ -1,12 +1,19 @@
 #version 430
 
+// We define the local group size. The variables are replaced in the python script.
 layout(local_size_x=GROUPX, local_size_y=GROUPY) in;
 
+// We define a structure to read the Boids from the input buffer. The memory of the buffer
+// is read with a 16 byte alignment, so in case of not using exactly a multiple of 16 bytes,
+// padding will be needed
 struct Boid
 {
     vec4 posVel;
 };
 
+// We define a struct-like to read from the buffer binded in the python script
+// We will use the buffer binded at 0 as input, the buffer binded at 1 as output
+// The buffer struct reads ALL the buffer, we later access by index to our boid of interest
 layout(std430, binding=0) buffer boids_in
 {
     Boid boids[];
@@ -18,8 +25,10 @@ layout(std430, binding=1) buffer boids_out
 } Out;
 
 void main() {
+    // We obtain the Invocation ID, which we'll use to access a single Boid per compute shader instance
     int callID = int(gl_GlobalInvocationID);
 
+    // Constants used for the simulation
     float matchFactor = MATCH_FACTOR;
     float avoidFactor = AVOID_FACTOR;
     float centeringFactor = CENTERING_FACTOR;
@@ -31,12 +40,12 @@ void main() {
     float innerDist = INNER_DIST;
     float outerDist = OUTER_DIST;
 
+    // We read our boid of interest using the invocation id
     Boid in_boid = In.boids[callID];
-    Boid out_boid;
-
+    // The information is saved in a variable so we can modify it without problems
     vec4 curInfo = in_boid.posVel.xyzw;
 
-
+    // Variables to save calculations
     vec2 avgVel = vec2(0., 0.);
     vec2 closeVel = vec2(0., 0.);
     vec2 centerPos = vec2(0., 0.);
@@ -54,7 +63,9 @@ void main() {
                     closeVel += betweenVec;
                 }
                 else {
+                    // Alignment
                     avgVel += otherInfo.zw;
+                    // Centering
                     centerPos += otherInfo.xy;
                     neighborCount++;
                 }
@@ -67,7 +78,6 @@ void main() {
         centerPos = centerPos/neighborCount;
     }
 
-    //vel = vel/(length(vel)+0.00001);
     curInfo.zw += (avgVel.xy - curInfo.zw)*matchFactor;
     curInfo.zw += closeVel.xy*avoidFactor;
     curInfo.zw += (centerPos - curInfo.xy)*centeringFactor;
@@ -92,6 +102,8 @@ void main() {
 
     curInfo.xy += curInfo.zw;
 
+    // Deffine a boid to save the information, then assign that boid to the output buffer
+    Boid out_boid;
     out_boid.posVel.xyzw = curInfo.xyzw;
     Out.boids[callID] = out_boid;
 }

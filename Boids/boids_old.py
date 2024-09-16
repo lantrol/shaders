@@ -1,36 +1,26 @@
+import os
+import sys
+
+import moderngl
 import numpy as np
-import arcade
-from arcade.gl import BufferDescription
+import pygame
 
 SCREEN_SIZE = 1000
-
 GROUPX = 256
 GROUPY = 1
 
-GRAPH_WIDTH = 200
-GRAPH_HEIGHT = 120
-GRAPH_MARGIN = 5
+os.environ['SDL_WINDOWS_DPI_AWARENESS'] = 'permonitorv2'
 
-NUM_BOIDS = 10000
-MATCH_FACTOR = 0.03;
-AVOID_FACTOR = 0.002;
-CENTERING_FACTOR = 0.002;
-TURN_FACTOR = 0.0001;
+# Makes Pygame use OpenGL for rendering
+pygame.init()
+pygame.display.set_mode((SCREEN_SIZE, SCREEN_SIZE), flags=pygame.OPENGL | pygame.DOUBLEBUF, vsync=False)
 
-MAX_SPEED = 0.008;
-MIN_SPEED = 0.004;
+CLOCK = pygame.time.Clock()
 
-INNER_DIST = 0.035;
-OUTER_DIST = 0.1;
-
-class MyWindow(arcade.Window):
+class Scene:
     def __init__(self):
-        super().__init__(SCREEN_SIZE, SCREEN_SIZE,
-                                 "Compute Shader",
-                                 gl_version=(4, 3),
-                                 resizable=True)
-
-        self.center_window()
+        # Detects a context created by the pygame window
+        self.ctx = moderngl.create_context()
 
         # The vertex shader recieves the information of each vertex defined before, assigning the vertex position
         # to gl_Position, and saving the UVs to be used later. Since the square represents our "Screen", the UVs are
@@ -61,12 +51,13 @@ class MyWindow(arcade.Window):
         )
 
         #X, Y, vel, angle
+        num_boids = 2000
         boids_info = []
-        for i in range(NUM_BOIDS):
+        for i in range(num_boids):
             a = np.random.rand()-0.5
             b = np.random.rand()-0.5
             c = np.sqrt(b**2 + a**2)/0.006
-            boids_info += [np.random.rand()*1.8-0.9, np.random.rand()*1.8-0.9, a/c, b/c]
+            boids_info += [np.random.rand()*2-1, np.random.rand()*2-1, a/c, b/c]
 
         # points = np.array([
         #     0., 0., 0.01, 0.,
@@ -76,61 +67,45 @@ class MyWindow(arcade.Window):
         points = np.array(boids_info)
 
         # We load the vertices into a vertex buffer object, allowing to Opengl to read them
-        self.vbo1 = self.ctx.buffer(data=points.astype('f4').tobytes())
-        self.vbo2 = self.ctx.buffer(data=points.astype('f4').tobytes())
+        self.vbo1 = self.ctx.buffer(points.astype('f4').tobytes())
+        self.vbo2 = self.ctx.buffer(points.astype('f4').tobytes())
         # We create a vertex array object for each program, asignin them the vertex buffer, telling them
         # how to interprete them (two pairs of floats), the first set to the variable "vert" and the second to "texcoord"
-        self.vao1 = self.ctx.geometry([BufferDescription(self.vbo1, '2f 2f', ['position', 'velocity'])], mode=self.ctx.POINTS)
-        self.vao2 = self.ctx.geometry([BufferDescription(self.vbo2, '2f 2f', ['position', 'velocity'])], mode=self.ctx.POINTS)
+        self.vao1 = self.ctx.vertex_array(self.program, [(self.vbo1, '2f 2f', 'position', 'velocity')], mode=self.ctx.POINTS)
+        self.vao2 = self.ctx.vertex_array(self.program, [(self.vbo2, '2f 2f', 'position', 'velocity')], mode=self.ctx.POINTS)
 
         file = open('compute_shader.glsl')
         comp_shader = file.read()
         comp_shader = comp_shader.replace("GROUPX", str(GROUPX))
         comp_shader = comp_shader.replace("GROUPY", str(GROUPY))
-        comp_shader = comp_shader.replace("MATCH_FACTOR", str(MATCH_FACTOR))
-        comp_shader = comp_shader.replace("TURN_FACTOR", str(TURN_FACTOR))
-        comp_shader = comp_shader.replace("AVOID_FACTOR", str(AVOID_FACTOR))
-        comp_shader = comp_shader.replace("CENTERING_FACTOR", str(CENTERING_FACTOR))
-        comp_shader = comp_shader.replace("MAX_SPEED", str(MAX_SPEED))
-        comp_shader = comp_shader.replace("MIN_SPEED", str(MIN_SPEED))
-        comp_shader = comp_shader.replace("INNER_DIST", str(INNER_DIST))
-        comp_shader = comp_shader.replace("OUTER_DIST", str(OUTER_DIST))
         print(comp_shader)
 
-        self.compute_shader = self.ctx.compute_shader(source=comp_shader)
+        self.compute_shader = self.ctx.compute_shader(comp_shader)
 
-        # --- Create FPS graph
-
-        # Enable timings for the performance graph
-        arcade.enable_timings()
-
-        # Create a sprite list to put the performance graph into
-        self.perf_graph_list = arcade.SpriteList()
-
-        # Create the FPS performance graph
-        graph = arcade.PerfGraph(GRAPH_WIDTH, GRAPH_HEIGHT, graph_data="FPS")
-        graph.center_x = GRAPH_WIDTH / 2
-        graph.center_y = self.height - GRAPH_HEIGHT / 2
-        self.perf_graph_list.append(graph)
-
-    def on_draw(self):
-        self.clear()
-
-        # Enable blending so our alpha channel works
-        self.ctx.enable(self.ctx.BLEND)
+    def render(self):
+        self.ctx.clear()
 
         self.vbo1.bind_to_storage_buffer(binding=0)
         self.vbo2.bind_to_storage_buffer(binding=1)
 
         self.compute_shader.run(group_x=GROUPX, group_y=GROUPY)
 
-        self.vao2.render(self.program)
+        self.vao2.render()
 
         self.vbo1, self.vbo2 = self.vbo2, self.vbo1
         self.vao1, self.vao2 = self.vao2, self.vao1
 
-        # Draw the graphs
-        self.perf_graph_list.draw()
 
-app = MyWindow()
-arcade.run()
+scene = Scene()
+
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                scene.texture0.write(scene.gen_initial_data(3*SCREEN_SIZE*SCREEN_SIZE).astype(np.uint8).tobytes())
+    scene.render()
+    pygame.display.flip()
+    CLOCK.tick(30)
