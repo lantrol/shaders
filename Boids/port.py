@@ -11,10 +11,17 @@ GRAPH_WIDTH = 200
 GRAPH_HEIGHT = 120
 GRAPH_MARGIN = 5
 
-NUM_BOIDS = 1
-INNER_RAD = 0.08
-OUTER_RAD = 0.12
-MATCHING_FACTOR = 0.2
+NUM_BOIDS = 10000
+MATCH_FACTOR = 0.03;
+AVOID_FACTOR = 0.002;
+CENTERING_FACTOR = 0.002;
+TURN_FACTOR = 0.0001;
+
+MAX_SPEED = 0.008;
+MIN_SPEED = 0.004;
+
+INNER_DIST = 0.035;
+OUTER_DIST = 0.1;
 
 class MyWindow(arcade.Window):
     def __init__(self):
@@ -80,10 +87,14 @@ class MyWindow(arcade.Window):
         comp_shader = file.read()
         comp_shader = comp_shader.replace("GROUPX", str(GROUPX))
         comp_shader = comp_shader.replace("GROUPY", str(GROUPY))
-        comp_shader = comp_shader.replace("MATCH_FACTOR", str(MATCHING_FACTOR))
-        comp_shader = comp_shader.replace("INNER_RAD", str(INNER_RAD))
-        comp_shader = comp_shader.replace("OUTER_RAD", str(OUTER_RAD))
-
+        comp_shader = comp_shader.replace("MATCH_FACTOR", str(MATCH_FACTOR))
+        comp_shader = comp_shader.replace("TURN_FACTOR", str(TURN_FACTOR))
+        comp_shader = comp_shader.replace("AVOID_FACTOR", str(AVOID_FACTOR))
+        comp_shader = comp_shader.replace("CENTERING_FACTOR", str(CENTERING_FACTOR))
+        comp_shader = comp_shader.replace("MAX_SPEED", str(MAX_SPEED))
+        comp_shader = comp_shader.replace("MIN_SPEED", str(MIN_SPEED))
+        comp_shader = comp_shader.replace("INNER_DIST", str(INNER_DIST))
+        comp_shader = comp_shader.replace("OUTER_DIST", str(OUTER_DIST))
         print(comp_shader)
 
         self.compute_shader = self.ctx.compute_shader(source=comp_shader)
