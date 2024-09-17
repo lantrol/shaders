@@ -1,7 +1,7 @@
 #version 430
 
 // We define the local group size. The variables are replaced in the python script.
-layout(local_size_x=GROUPX, local_size_y=GROUPY) in;
+layout(local_size_x=LOCALX, local_size_y=LOCALY) in;
 
 // We define a structure to read the Boids from the input buffer. The memory of the buffer
 // is read with a 16 byte alignment, so in case of not using exactly a multiple of 16 bytes,
@@ -60,7 +60,9 @@ void main() {
             if (dist < outerDist){
                 if (dist < innerDist) {
                     // Separation
-                    closeVel += betweenVec;
+                    vec2 auxVec = betweenVec*innerDist/dist;
+                    auxVec -= betweenVec;
+                    closeVel += auxVec;
                 }
                 else {
                     // Alignment

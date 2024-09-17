@@ -4,23 +4,26 @@ from arcade.gl import BufferDescription
 
 SCREEN_SIZE = 1000
 
-GROUPX = 256
+GROUPX = 128
 GROUPY = 1
+
+LOCALX = 128
+LOCALY = 1
 
 GRAPH_WIDTH = 200
 GRAPH_HEIGHT = 120
 GRAPH_MARGIN = 5
 
-NUM_BOIDS = 10000
+NUM_BOIDS = 16384
 MATCH_FACTOR = 0.03;
-AVOID_FACTOR = 0.002;
+AVOID_FACTOR = 0.0007;
 CENTERING_FACTOR = 0.002;
 TURN_FACTOR = 0.0001;
 
 MAX_SPEED = 0.008;
 MIN_SPEED = 0.004;
 
-INNER_DIST = 0.035;
+INNER_DIST = 0.05;
 OUTER_DIST = 0.1;
 
 class MyWindow(arcade.Window):
@@ -80,8 +83,8 @@ class MyWindow(arcade.Window):
         # Whe load the compute shader and replace all the constants with the ones defined in the python script.
         file = open('compute_shader.glsl')
         comp_shader = file.read()
-        comp_shader = comp_shader.replace("GROUPX", str(GROUPX))
-        comp_shader = comp_shader.replace("GROUPY", str(GROUPY))
+        comp_shader = comp_shader.replace("LOCALX", str(LOCALX))
+        comp_shader = comp_shader.replace("LOCALY", str(LOCALY))
         comp_shader = comp_shader.replace("MATCH_FACTOR", str(MATCH_FACTOR))
         comp_shader = comp_shader.replace("TURN_FACTOR", str(TURN_FACTOR))
         comp_shader = comp_shader.replace("AVOID_FACTOR", str(AVOID_FACTOR))
@@ -90,7 +93,6 @@ class MyWindow(arcade.Window):
         comp_shader = comp_shader.replace("MIN_SPEED", str(MIN_SPEED))
         comp_shader = comp_shader.replace("INNER_DIST", str(INNER_DIST))
         comp_shader = comp_shader.replace("OUTER_DIST", str(OUTER_DIST))
-        print(comp_shader)
 
         # We define a compute shader and give it the file as source
         self.compute_shader = self.ctx.compute_shader(source=comp_shader)
