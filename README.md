@@ -10,7 +10,9 @@ Helpful to understand the basics of textures and framebuffers.
 
 ## Boids Simulation:
 2D simulation of Boids made using Python Arcade and GLSL, used to learn the basics of compute shaders.
-In the following GIF you can see it run on a laptop iGPU with 10000 Boids at around 30 FPS, totaling 100000000 calculations.
+In the following GIF you can see it run on a laptop iGPU with 16384 boids, performing between 50 to 60 FPS.
+
 The algorithm can be found here: https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html#Separation
 
-![BoidsGIF](https://github.com/user-attachments/assets/2475ec5d-2819-407a-ab7a-e06feb4d17bb)
+![BoidsSimGIF](https://github.com/user-attachments/assets/36af713f-4a60-4bdc-b936-abd0c3b96905)
+
