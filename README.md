@@ -16,3 +16,11 @@ The algorithm can be found here: https://vanhunteradams.com/Pico/Animal_Movement
 
 ![BoidsSimGIF](https://github.com/user-attachments/assets/36af713f-4a60-4bdc-b936-abd0c3b96905)
 
+## Fluid Simulation:
+2D fluid simulation made with ModernGL. Thanks to it beeing in 2D, we can simulate it without the need of compute shaders,
+by using fragment shaders. Compute shaders will be needed for the 3D version. This simulation is still not "perfect", 
+but mostly works as it should. 
+
+The performance is of 45 FPS on a AMD iGPU, simulating a grid of 1024x1024. The simulation its based of "Real-Time Fluid Dynamics for Games" paper.
+
+![FluidSim](https://github.com/user-attachments/assets/d9953744-46dd-483e-8144-8225d789c9c5)
