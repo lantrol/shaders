@@ -30,6 +30,8 @@ The performance is of 45 FPS on a AMD iGPU, simulating a grid of 1024x1024. The 
 3D volume rendering inside of a cube, allowing to rotate the cube and see the fluid from multiple angles. The rendering makes the execution slower,
 if the rendering code is commented the simulations runs considerably faster.
 
+![fluid3d](https://github.com/user-attachments/assets/0140032a-ba1b-4062-90b4-c8c4d27d8941)
+
 ## Numba coded of fluid simulations:
 The 2D and 3D simulations are also implemented using Numba for performance comparissons. This code does NOT have realtime rendering, as Numba
 doesn't allow this in a easy way.
