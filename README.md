@@ -24,3 +24,17 @@ but mostly works as it should.
 The performance is of 45 FPS on a AMD iGPU, simulating a grid of 1024x1024. The simulation its based of "Real-Time Fluid Dynamics for Games" paper.
 
 ![FluidSim](https://github.com/user-attachments/assets/d9953744-46dd-483e-8144-8225d789c9c5)
+
+## Fluid Simulation 3D:
+3D Fluid simulation made with ModernGL. Uses compute shaders to make easier working with 3D textures. There is also implemented a simple
+3D volume rendering inside of a cube, allowing to rotate the cube and see the fluid from multiple angles. The rendering makes the execution slower,
+if the rendering code is commented the simulations runs considerably faster.
+
+## Numba coded of fluid simulations:
+The 2D and 3D simulations are also implemented using Numba for performance comparissons. This code does NOT have realtime rendering, as Numba
+doesn't allow this in a easy way.
+
+## Wave Simulations
+2D Wave simulation usin FDTDs is made both in plain Python and ModernGL. The use of ModernGL here is a bit different. While in the others the code
+is run inside a on_render() loop of the moderngl-window, here OpenGL is in a headless way. No window nor rendering is used, only calling compute shaders
+to run when needed. This makes it easier to run shaders from other parts of the code not limited to the on_render() function.
